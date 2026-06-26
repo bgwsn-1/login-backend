@@ -69,7 +69,7 @@ app.all('/player/login/dashboard', async (req: Request, res: Response) => {
   const templatePath = path.join(process.cwd(), 'template', 'dashboard.html');
 
   const templateContent = fs.readFileSync(templatePath, 'utf-8');
-  const htmlContent = templateContent.replace('{{ data }}', encodedClientData);
+  const htmlContent = templateContent.split('{{ data }}').join(encodedClientData);
 
   res.setHeader('Content-Type', 'text/html');
   res.send(htmlContent);
@@ -215,12 +215,17 @@ app.all(
         decodedRefreshToken = decodedRefreshToken.replace('&reg=1', '');
       }
 
-      const token = Buffer.from(
-        decodedRefreshToken.replace(
-          /(_token=)[^&]*/,
-          `$1${Buffer.from(clientData).toString('base64')}`,
-        ),
-      ).toString('base64');
+      let updatedRefreshToken = decodedRefreshToken.replace(
+        /(_token=)[^&]*/,
+        `$1${Buffer.from(clientData).toString('base64')}`,
+      );
+
+      // @note always append reg=0 to ensure the game server recognizes it as a login request
+      if (!updatedRefreshToken.includes('&reg=')) {
+        updatedRefreshToken += '&reg=0';
+      }
+
+      const token = Buffer.from(updatedRefreshToken).toString('base64');
 
       res.send(
         JSON.stringify({
