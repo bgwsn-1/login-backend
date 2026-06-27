@@ -86,8 +86,8 @@ app.all(
     try {
       const formData = req.body as Record<string, string>;
       const _token = formData._token;
-      const growId = formData.growId;
-      const password = formData.password;
+      const growId = formData.growId || '';
+      const password = formData.password || '';
       const email = formData.email;
 
       let token = '';
