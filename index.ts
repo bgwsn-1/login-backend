@@ -3,19 +3,12 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
-
 const app = express();
 const PORT = 3000;
-
-// @note trust proxy - set to number of proxies in front of app
 app.set('trust proxy', 1);
-
-// @note middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
-// @note rate limiter - 50 requests per minute
 const limiter = rateLimit({
   windowMs: 60_000,
   max: 50,
@@ -24,11 +17,7 @@ const limiter = rateLimit({
   validate: { trustProxy: false, xForwardedForHeader: false },
 });
 app.use(limiter);
-
-// @note static files from public folder
 app.use(express.static(path.join(process.cwd(), 'public')));
-
-// @note request logging middleware
 app.use((req: Request, _res: Response, next: NextFunction) => {
   const clientIp =
     (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
